@@ -314,7 +314,7 @@ const nights=()=>Math.max(0,Math.round((new Date(S.co)-new Date(S.ci))/864e5));
 /* ---------- build filters ---------- */
 $("#cities").innerHTML=[...new Set(HOTELS.map(h=>h.city))].map(c=>`<option value="${c}">`).join("");
 $("#ci").value=S.ci;$("#co").value=S.co;$("#ci").min=iso(today);
-$("#starBox").insertAdjacentHTML("beforeend",[5,4,3,2].map(s=>`<label class="check"><input type="checkbox" value="${s}" data-star> <span class="stars">${"👍".repeat(s)}</span></label>`).join(""));
+$("#starBox").insertAdjacentHTML("beforeend",[5,4,3,2].map(s=>`<label class="check"><input type="checkbox" value="${s}" data-star> <span class="stars">${"★".repeat(s)}</span></label>`).join(""));
 $("#amenBox").insertAdjacentHTML("beforeend",Object.entries(AMEN).map(([k,v])=>`<label class="check"><input type="checkbox" value="${k}" data-am> ${v}</label>`).join(""));
 if(matchMedia("(max-width:820px)").matches)$("#filters").open=false;
 
@@ -335,7 +335,7 @@ function render(){
      <div class="thumb">${scene(h.scene)}<button class="fav" data-fav="${h.id}" aria-label="${S.favs.has(h.id)?"რჩეულებიდან ამოღება":"რჩეულებში დამატება"}">${heart(S.favs.has(h.id))}</button></div>
      <div class="info">
        <h3><button data-open="${h.id}">${h.name}</button></h3>
-       <div><span class="stars" aria-label="${h.stars} ვარსკვლავი">${"👍".repeat(h.stars)}</span> <span class="loc">· ${h.city}, ${h.area}</span></div>
+       <div><span class="stars" aria-label="${h.stars} ვარსკვლავი">${"★".repeat(h.stars)}</span> <span class="loc">· ${h.city}, ${h.area}</span></div>
        <p class="blurb">${h.blurb}</p>
        <div class="tags">${h.am.slice(0,4).map(a=>`<span class="tag">${AMEN[a]}</span>`).join("")}</div>
        ${h.left?`<div class="left">დარჩა ${h.left} ოთახი ამ ფასად</div>`:""}
@@ -356,7 +356,7 @@ function hotelView(id){
   openDlg(`
    <div class="dlg-head"><div class="thumb">${scene(h.scene)}</div><button class="x" data-close aria-label="დახურვა">×</button></div>
    <div class="dlg-body">
-     <div class="row"><div><span class="stars">${"👍".repeat(h.stars)}</span><h2>${h.name}</h2><div class="loc">${h.city}, ${h.area}</div></div>
+     <div class="row"><div><span class="stars">${"★".repeat(h.stars)}</span><h2>${h.name}</h2><div class="loc">${h.city}, ${h.area}</div></div>
        <div class="score"><span>${word(h.score)}<small>${h.reviews} შეფასება</small></span><b>${h.score.toFixed(1)}</b></div></div>
      <p class="blurb" style="margin:0">${h.blurb}</p>
      <div class="tags">${h.am.map(a=>`<span class="tag">${AMEN[a]}</span>`).join("")}</div>
