@@ -34,6 +34,11 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1
 .brand{display:flex;align-items:baseline;gap:8px;font-family:var(--display);font-weight:800;font-size:26px;color:var(--accent);letter-spacing:.01em}
 .brand small{font-family:var(--body);font-weight:500;font-size:12px;color:var(--muted);letter-spacing:.04em}
 .navbtns{display:flex;gap:8px}
+.hleft{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.sitenav{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.sitenav a{padding:5px 14px;border-radius:999px;text-decoration:none;color:var(--muted);font-size:14px}
+.sitenav a:hover{color:var(--ink)}
+.sitenav a.on{background:var(--accent);color:var(--accent-ink);font-weight:600}
 .ghost{background:none;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:14px}
 .ghost:hover{border-color:var(--accent);color:var(--accent)}
 .count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:12px;text-align:center}
@@ -159,7 +164,13 @@ footer .wrap{padding-block:18px}
 
 <header>
   <div class="wrap">
-    <div class="brand">ღამე <small>სასტუმროები საქართველოში</small></div>
+    <div class="hleft">
+      <div class="brand">ღამე <small>სასტუმროები საქართველოში</small></div>
+      <nav class="sitenav" aria-label="საიტის განყოფილებები">
+        <a href="index.html" class="on" aria-current="page">სასტუმროები</a>
+        <a href="cars.html">ავტომობილები</a>
+      </nav>
+    </div>
     <div class="navbtns">
       <button class="ghost" id="favBtn" aria-pressed="false">რჩეულები<span class="count" id="favCount">0</span></button>
       <button class="ghost" id="myBtn">ჩემი ჯავშნები</button>

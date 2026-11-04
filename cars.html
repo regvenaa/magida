@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ღამე — ავტომობილები</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Noto+Serif+Georgian:wght@600;800&display=swap">
+<style>
+/* Same dark palette as index.html (black background) */
+:root{
+  --bg:#000000; --surface:#1a201e; --sunk:#232a27; --ink:#e7ece9; --muted:#9ba7a2; --line:#2d3532;
+  --accent:#e07a9a; --accent-ink:#22080f; --accent-soft:#3a1c26;
+  --ok:#78b9a4; --warn:#e69a62; --gold:#e3b04b; color-scheme:dark;
+  --display:"Noto Serif Georgian", Georgia, serif;
+  --body:"Noto Sans Georgian", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:10px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance}
+
+/* header */
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px;flex-wrap:wrap}
+.left{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:800;font-size:26px;color:var(--accent);text-decoration:none}
+.sitenav{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.sitenav a{padding:5px 14px;border-radius:999px;text-decoration:none;color:var(--muted);font-size:14px}
+.sitenav a.on{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.navbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ghost{background:none;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:14px}
+.ghost:hover{border-color:var(--accent);color:var(--accent)}
+.count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:12px;text-align:center}
+.cur{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.cur button{border:0;background:none;padding:6px 12px;font-size:14px;color:var(--muted)}
+.cur button.on{background:var(--sunk);color:var(--ink);font-weight:700}
+.add{border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:600;padding:8px 16px;font-size:14px}
+
+/* search */
+.hero{padding-block:18px 22px}
+.hero h1{font-family:var(--display);font-weight:800;font-size:clamp(24px,3.6vw,36px);line-height:1.2;margin-bottom:14px}
+.searchbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+#dealTabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+#dealTabs button{border:1px solid var(--line);background:none;border-radius:999px;padding:6px 14px;font-size:14px;color:var(--muted)}
+#dealTabs button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:10px;align-items:end}
+.sf{display:flex;flex-direction:column;gap:4px;min-width:0}
+.sf label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+.pair{display:flex;gap:6px}
+select,input[type=number],input[type=text],input:not([type]){background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px;width:100%;min-width:0}
+select:focus,input:focus{outline:none;border-color:var(--accent)}
+#searchBtn{grid-row:span 2;align-self:stretch;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-weight:700;padding:0 26px;font-size:16px}
+@media (max-width:900px){.sgrid{grid-template-columns:1fr 1fr}#searchBtn{grid-column:1/-1;grid-row:auto;padding:12px;order:2}}
+
+/* categories */
+#cats{display:flex;gap:8px;overflow-x:auto;padding-block:16px 4px;scrollbar-width:thin}
+.cat{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:96px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;font-size:13.5px}
+.cat svg{width:44px;height:20px;fill:currentColor;color:var(--muted)}
+.cat small{color:var(--muted);font-size:12px}
+.cat.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.cat.on svg{color:var(--accent)}
+
+/* VIP row */
+.sect{font-family:var(--display);font-size:20px;font-weight:600;margin:22px 0 10px}
+#vipRow{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,260px);gap:12px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin}
+
+/* layout */
+.main{display:grid;grid-template-columns:250px 1fr;gap:24px;align-items:start;padding-block:10px 48px}
+aside{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:16px;position:sticky;top:12px}
+aside h3{font-size:13px;color:var(--muted);letter-spacing:.04em;margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:none;border-radius:999px;padding:4px 11px;font-size:13px;color:var(--muted)}
+.chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+.chk input{width:17px;height:17px;accent-color:var(--accent)}
+#resetBtn{background:none;border:0;color:var(--accent);font-weight:600;padding:0;align-self:flex-start}
+#mobFilter{display:none}
+@media (max-width:820px){
+  .main{grid-template-columns:1fr}
+  aside{display:none;position:static}
+  aside.open{display:flex}
+  #mobFilter{display:inline-block}
+}
+
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;scroll-margin-top:12px}
+.toolbar .meta{display:flex;flex-direction:column}
+#countMeta{font-size:12.5px;color:var(--muted)}
+#resultMeta{font-weight:700;font-size:17px}
+.toolbar .r{display:flex;gap:8px;align-items:center}
+.toolbar select{width:auto}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+
+/* card */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:border-color .15s,transform .15s}
+.card:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line));transform:translateY(-2px)}
+.card.vip{border-color:color-mix(in srgb,var(--gold) 55%,var(--line))}
+.ph{position:relative;aspect-ratio:16/10;background:var(--sunk);overflow:hidden}
+.ph svg{display:block;width:100%;height:100%}
+.badge{position:absolute;top:8px;left:8px;background:var(--gold);color:#241a05;font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:6px;letter-spacing:.04em}
+.badge.sr{background:#8b6cf0;color:#fff}
+.favb{position:absolute;top:6px;right:6px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.45);display:grid;place-items:center}
+.favb svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2}
+.favb.on svg{fill:var(--accent);stroke:var(--accent)}
+.photos{position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,.55);color:#fff;font-size:11.5px;padding:1px 7px;border-radius:6px}
+.cb{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.ttl{display:flex;justify-content:space-between;gap:8px;font-weight:700}
+.ttl span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.yr{color:var(--muted);font-weight:500}
+.specs{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;font-size:12.5px;color:var(--muted)}
+.specs span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.loc{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.price{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:6px;border-top:1px solid var(--line)}
+.price strong{font-size:18px;font-variant-numeric:tabular-nums}
+.tag{font-size:11.5px;padding:1px 8px;border-radius:999px}
+.tag.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.tag.no{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:32px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--ink);margin-bottom:4px}
+#pager{display:flex;gap:6px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+#pager button{min-width:36px;height:36px;border:1px solid var(--line);background:var(--surface);border-radius:8px}
+#pager button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:grid;place-items:center;padding:12px;z-index:50}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:14px;width:min(880px,100%);max-height:calc(100dvh - 24px);overflow:auto;padding:18px 20px 22px}
+.mh{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.mh h3{font-family:var(--display);font-size:22px;font-weight:600}
+.x{width:36px;height:36px;border-radius:50%;border:0;background:var(--sunk);font-size:20px;line-height:1;flex:0 0 auto}
+.dgrid{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}
+@media (max-width:700px){.dgrid{grid-template-columns:1fr}}
+.dgrid .ph{border-radius:var(--r)}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.thumbs div{aspect-ratio:16/10;border-radius:6px;overflow:hidden}
+.thumbs svg{display:block;width:100%;height:100%}
+.bigp{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
+.dt{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px}
+.dt td{padding:6px 0;border-bottom:1px solid var(--line)}
+.dt td:first-child{color:var(--muted);width:45%}
+.seller{background:var(--sunk);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px}
+.phone{font-size:22px;font-weight:700;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;font-size:14px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form .full{grid-column:1/-1}
+@media (max-width:560px){.form{grid-template-columns:1fr}}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer .wrap{padding-block:18px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="left">
+      <a class="brand" href="index.html">ღამე</a>
+      <nav class="sitenav" aria-label="საიტის განყოფილებები">
+        <a href="index.html">სასტუმროები</a>
+        <a href="cars.html" class="on" aria-current="page">ავტომობილები</a>
+      </nav>
+    </div>
+    <div class="navbtns">
+      <div class="cur" role="group" aria-label="ვალუტა"><button id="curGel">₾</button><button id="curUsd">$</button></div>
+      <button class="ghost" id="favBtn">რჩეულები<span class="count" id="favCount">0</span></button>
+      <button class="add" id="addBtn">+ განცხადება</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>იპოვე შენი შემდეგი მანქანა</h1>
+    <div class="searchbox">
+      <div id="dealTabs">
+        <button data-v="sale" class="on">იყიდება</button>
+        <button data-v="rent">ქირავდება</button>
+        <button data-v="order">შეკვეთით</button>
+      </div>
+      <div class="sgrid">
+        <div class="sf"><label for="sMake">მწარმოებელი</label><select id="sMake"></select></div>
+        <div class="sf"><label for="sModel">მოდელი</label><select id="sModel"></select></div>
+        <div class="sf"><label for="sYearFrom">წელი</label><div class="pair"><select id="sYearFrom" aria-label="წელი, დან"></select><select id="sYearTo" aria-label="წელი, მდე"></select></div></div>
+        <div class="sf"><label for="sPriceFrom">ფასი, <span class="curSym">₾</span></label><div class="pair"><input id="sPriceFrom" type="number" min="0" placeholder="დან"><input id="sPriceTo" type="number" min="0" placeholder="მდე" aria-label="ფასი, მდე"></div></div>
+        <button id="searchBtn">ძებნა <span id="foundCnt"></span></button>
+        <div class="sf"><label for="sFuel">საწვავი</label><select id="sFuel"></select></div>
+        <div class="sf"><label for="sLoc">მდებარეობა</label><select id="sLoc"></select></div>
+      </div>
+    </div>
+    <div id="cats"></div>
+  </div>
+</section>
+
+<div class="wrap">
+  <h2 class="sect">VIP განცხადებები</h2>
+  <div id="vipRow"></div>
+
+  <div class="main">
+    <aside id="filters">
+      <div><h3>გადაცემათა კოლოფი</h3><div class="chips" id="fTrans"></div></div>
+      <div><h3>საჭე</h3><div class="chips" id="fWheel"></div></div>
+      <div><h3>ძრავის მოცულობა, ლ</h3><div class="pair"><select id="fEngFrom" aria-label="ძრავი, დან"></select><select id="fEngTo" aria-label="ძრავი, მდე"></select></div></div>
+      <div><h3>გარბენი, კმ-მდე</h3><input id="fKmTo" type="number" min="0" step="10000" placeholder="მაგ. 150000" aria-label="მაქსიმალური გარბენი"></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label class="chk"><input type="checkbox" id="fCustoms"> მხოლოდ განბაჟებული</label>
+        <label class="chk"><input type="checkbox" id="fDealer"> მხოლოდ დილერი</label>
+        <label class="chk"><input type="checkbox" id="fFavOnly"> მხოლოდ რჩეულები</label>
+      </div>
+      <button id="resetBtn">ფილტრების გასუფთავება</button>
+    </aside>
+
+    <section>
+      <div class="toolbar">
+        <div class="meta"><span id="countMeta"></span><span id="resultMeta"></span></div>
+        <div class="r">
+          <button class="ghost" id="mobFilter">ფილტრები</button>
+          <select id="sort" aria-label="დალაგება">
+            <option value="new">ახალი განცხადებები</option>
+            <option value="pAsc">ფასი: იაფიდან</option>
+            <option value="pDesc">ფასი: ძვირიდან</option>
+            <option value="yDesc">წელი: ახლიდან</option>
+            <option value="km">გარბენი: ნაკლებიდან</option>
+          </select>
+        </div>
+      </div>
+      <div id="grid"></div>
+      <div id="pager"></div>
+    </section>
+  </div>
+</div>
+
+<footer><div class="wrap">ღამე — სადემონსტრაციო საიტი. განცხადებები სანიმუშოა, რჩეულები ინახება მხოლოდ თქვენს ბრაუზერში.</div></footer>
+
+<div id="ovWrap"></div>
+<script src="cars.js"></script>
+</body>
+</html>
