@@ -6,7 +6,6 @@
   <title>მაგიდა — დაჯავშნე მაგიდა</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -25,9 +24,10 @@
       flex-wrap: wrap;
       gap: 12px;
     }
-    header h1 { margin: 0; font-size: 26px; }
+    header h1 { margin: 0; font-size: 30px; }
     .header-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
     .clock { font-size: 16px; font-variant-numeric: tabular-nums; }
+    .clock b { font-size: 20px; }
     .lang button {
       background: transparent;
       color: white;
@@ -39,14 +39,20 @@
       font-weight: 700;
     }
     .lang button.active { background: white; color: #8B1E3F; }
-    .hero { text-align: center; padding: 40px 20px 20px; }
-    .hero h2 { font-size: 28px; color: #E8A0B4; margin: 0 0 10px; }
+    .hero {
+      text-align: center;
+      padding: 50px 20px 20px;
+    }
+    .hero h2 {
+      font-size: 28px;
+      color: #E8A0B4;
+    }
     .section-title { color: #E8A0B4; padding: 0 20px; margin: 36px 0 14px; font-size: 22px; }
-    .filters { display: flex; gap: 10px; padding: 0 20px; flex-wrap: wrap; }
+    .filters { display: flex; gap: 10px; padding: 0 20px; flex-wrap: wrap; justify-content: center; }
     .filters button {
       background: #1c1c1c;
       color: #f5f5f5;
-      border: 1px solid #333;
+      border: 1px solid #333333;
       padding: 8px 18px;
       border-radius: 20px;
       cursor: pointer;
@@ -68,8 +74,12 @@
       padding: 20px;
       box-shadow: 0 2px 8px rgba(255,255,255,0.08);
     }
-    .card h3 { margin: 10px 0 6px; }
-    .card p { color: #bbbbbb; margin: 0 0 14px; }
+    .card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
     .card button {
       background: #8B1E3F;
       color: white;
@@ -87,8 +97,13 @@
       padding: 3px 10px;
       border-radius: 12px;
     }
-    #map { height: 400px; margin: 0 20px; border-radius: 12px; }
-    .popup-title { font-weight: 700; }
+    #map {
+      height: 400px;
+      margin: 0 20px;
+      border-radius: 12px;
+      background: #1c1c1c;
+      color: #999999;
+    }
     .weather { display: flex; gap: 12px; padding: 0 20px; overflow-x: auto; }
     .day {
       flex: 1;
@@ -102,7 +117,7 @@
     .day-date { font-size: 12px; color: #999999; }
     .icon { font-size: 30px; margin: 8px 0; }
     .temp span { color: #999999; }
-    .empty { color: #999999; padding: 0 20px; }
+    .note { color: #999999; padding: 0 20px; }
     footer {
       background: #1c1c1c;
       color: #aaaaaa;
@@ -114,26 +129,331 @@
 </head>
 <body>
 
-  <!-- ზედა ზოლი: სახელი, თბილისის დრო, ენის გადამრთველი -->
+  <!-- ===== ზედა ზოლი: სახელი + თბილისის დრო + ენა ===== -->
   <header>
     <h1>🍽️ <span data-i18n="brand">მაგიდა</span></h1>
     <div class="header-right">
-      <div class="clock">🕒 <span data-i18n="tbilisi">თბილისი</span> <span id="clock">--:--:--</span></div>
+      <div class="clock">🕒 <span data-i18n="tbilisi">თბილისი</span> <b id="clock">--:--:--</b></div>
       <div class="lang">
-        <button id="btn-ka" onclick="setLang('ka')">GEO</button>
-        <button id="btn-en" onclick="setLang('en')">ENG</button>
+        <button type="button" id="btn-ka" class="active">GEO</button>
+        <button type="button" id="btn-en">ENG</button>
       </div>
     </div>
   </header>
 
+  <!-- ===== ძველი ნაწილი: მთავარი ტექსტი ===== -->
   <section class="hero">
     <h2 data-i18n="heroTitle">დაჯავშნე მაგიდა საქართველოს რესტორნებში</h2>
     <p data-i18n="heroText">რესტორნები, ბარები და კაფეები — ერთ ადგილას</p>
   </section>
 
-  <!-- სამზარეულოს ფილტრი -->
-  <h2 class="section-title" data-i18n="cuisineTitle">სამზარეულო</h2>
+  <!-- ===== ახალი: სამზარეულოს ჩამონათვალი ===== -->
   <div class="filters">
-    <button class="active" data-cuisine="all" data-i18n="all" onclick="filterCuisine('all')">ყველა</button>
-    <button data-cuisine="georgian" data-i18n="georgian" onclick="filterCuisine('georgian')">ქართული</button>
-    <button
+    <button type="button" class="active" data-filter="all" data-i18n="all">ყველა</button>
+    <button type="button" data-filter="georgian" data-i18n="georgian">ქართული</button>
+    <button type="button" data-filter="european" data-i18n="european">ევროპული</button>
+    <button type="button" data-filter="asian" data-i18n="asian">აზიური</button>
+  </div>
+
+  <!-- ===== ძველი ნაწილი: რესტორნების ბარათები (+ 2 ახალი) ===== -->
+  <section class="restaurants">
+    <div class="card" data-cuisine="georgian" data-lat="41.6925" data-lng="44.8070">
+      <span class="tag" data-i18n="georgian">ქართული</span>
+      <h3 data-i18n="r1name">სამაგალითო რესტორანი 1</h3>
+      <p data-i18n="r1info">📍 თბილისი · ქართული სამზარეულო</p>
+      <button type="button" class="book" data-i18n="book">დაჯავშნა</button>
+    </div>
+    <div class="card" data-cuisine="georgian">
+      <span class="tag" data-i18n="georgian">ქართული</span>
+      <h3 data-i18n="r2name">სამაგალითო ბარი 2</h3>
+      <p data-i18n="r2info">📍 ბათუმი · ღვინის ბარი</p>
+      <button type="button" class="book" data-i18n="book">დაჯავშნა</button>
+    </div>
+    <div class="card" data-cuisine="european">
+      <span class="tag" data-i18n="european">ევროპული</span>
+      <h3 data-i18n="r3name">სამაგალითო კაფე 3</h3>
+      <p data-i18n="r3info">📍 ქუთაისი · კაფე</p>
+      <button type="button" class="book" data-i18n="book">დაჯავშნა</button>
+    </div>
+    <div class="card" data-cuisine="georgian">
+      <span class="tag" data-i18n="georgian">ქართული</span>
+      <h3 data-i18n="r4name">სამაგალითო რესტორანი 4</h3>
+      <p data-i18n="r4info">📍 თელავი · კახური სამზარეულო</p>
+      <button type="button" class="book" data-i18n="book">დაჯავშნა</button>
+    </div>
+    <div class="card" data-cuisine="european" data-lat="41.7095" data-lng="44.7650">
+      <span class="tag" data-i18n="european">ევროპული</span>
+      <h3 data-i18n="r5name">სამაგალითო ბისტრო 5</h3>
+      <p data-i18n="r5info">📍 თბილისი, ვაკე · ევროპული სამზარეულო</p>
+      <button type="button" class="book" data-i18n="book">დაჯავშნა</button>
+    </div>
+    <div class="card" data-cuisine="asian" data-lat="41.7270" data-lng="44.7520">
+      <span class="tag" data-i18n="asian">აზიური</span>
+      <h3 data-i18n="r6name">სამაგალითო სუში 6</h3>
+      <p data-i18n="r6info">📍 თბილისი, საბურთალო · აზიური სამზარეულო</p>
+      <button type="button" class="book" data-i18n="book">დაჯავშნა</button>
+    </div>
+  </section>
+
+  <!-- ===== ახალი: რუკა ===== -->
+  <h2 class="section-title" data-i18n="mapTitle">რესტორნები თბილისის რუკაზე</h2>
+  <div id="map"></div>
+
+  <!-- ===== ახალი: ამინდი ===== -->
+  <h2 class="section-title" data-i18n="weatherTitle">ამინდი თბილისში — 7 დღე</h2>
+  <div class="weather" id="weather"><p class="note" data-i18n="loading">იტვირთება...</p></div>
+
+  <!-- ===== ძველი ნაწილი: ქვედა ზოლი ===== -->
+  <footer>
+    <p data-i18n="footer">© 2026 მაგიდა · კონტაქტი: info@magida.ge</p>
+  </footer>
+
+
+  <!-- ========== 1. თბილისის საათი ========== -->
+  <script>
+    function updateClock() {
+      // საქართველო ყოველთვის UTC+4-შია (ზაფხულის დრო არ გვაქვს)
+      var now = new Date(Date.now() + 4 * 60 * 60 * 1000);
+      var h = String(now.getUTCHours()).padStart(2, '0');
+      var m = String(now.getUTCMinutes()).padStart(2, '0');
+      var s = String(now.getUTCSeconds()).padStart(2, '0');
+      document.getElementById('clock').textContent = h + ':' + m + ':' + s;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+
+
+  <!-- ========== 2. ენის შეცვლა (GEO / ENG) ========== -->
+  <script>
+    var translations = {
+      ka: {
+        pageTitle: 'მაგიდა — დაჯავშნე მაგიდა',
+        brand: 'მაგიდა',
+        tbilisi: 'თბილისი',
+        heroTitle: 'დაჯავშნე მაგიდა საქართველოს რესტორნებში',
+        heroText: 'რესტორნები, ბარები და კაფეები — ერთ ადგილას',
+        all: 'ყველა',
+        georgian: 'ქართული',
+        european: 'ევროპული',
+        asian: 'აზიური',
+        r1name: 'სამაგალითო რესტორანი 1',
+        r1info: '📍 თბილისი · ქართული სამზარეულო',
+        r2name: 'სამაგალითო ბარი 2',
+        r2info: '📍 ბათუმი · ღვინის ბარი',
+        r3name: 'სამაგალითო კაფე 3',
+        r3info: '📍 ქუთაისი · კაფე',
+        r4name: 'სამაგალითო რესტორანი 4',
+        r4info: '📍 თელავი · კახური სამზარეულო',
+        r5name: 'სამაგალითო ბისტრო 5',
+        r5info: '📍 თბილისი, ვაკე · ევროპული სამზარეულო',
+        r6name: 'სამაგალითო სუში 6',
+        r6info: '📍 თბილისი, საბურთალო · აზიური სამზარეულო',
+        book: 'დაჯავშნა',
+        bookAlert: 'დაჯავშნის ფუნქცია მალე დაემატება!',
+        mapTitle: 'რესტორნები თბილისის რუკაზე',
+        mapError: 'რუკის ჩატვირთვა ვერ მოხერხდა',
+        weatherTitle: 'ამინდი თბილისში — 7 დღე',
+        weatherError: 'ამინდის ჩატვირთვა ვერ მოხერხდა',
+        loading: 'იტვირთება...',
+        today: 'დღეს',
+        days: ['კვი', 'ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ'],
+        footer: '© 2026 მაგიდა · კონტაქტი: info@magida.ge'
+      },
+      en: {
+        pageTitle: 'Magida — Book a table',
+        brand: 'Magida',
+        tbilisi: 'Tbilisi',
+        heroTitle: 'Book a table at restaurants across Georgia',
+        heroText: 'Restaurants, bars and cafés — all in one place',
+        all: 'All',
+        georgian: 'Georgian',
+        european: 'European',
+        asian: 'Asian',
+        r1name: 'Sample Restaurant 1',
+        r1info: '📍 Tbilisi · Georgian cuisine',
+        r2name: 'Sample Bar 2',
+        r2info: '📍 Batumi · Wine bar',
+        r3name: 'Sample Café 3',
+        r3info: '📍 Kutaisi · Café',
+        r4name: 'Sample Restaurant 4',
+        r4info: '📍 Telavi · Kakhetian cuisine',
+        r5name: 'Sample Bistro 5',
+        r5info: '📍 Tbilisi, Vake · European cuisine',
+        r6name: 'Sample Sushi 6',
+        r6info: '📍 Tbilisi, Saburtalo · Asian cuisine',
+        book: 'Book',
+        bookAlert: 'Booking is coming soon!',
+        mapTitle: 'Restaurants on the Tbilisi map',
+        mapError: 'Could not load the map',
+        weatherTitle: 'Tbilisi weather — 7 days',
+        weatherError: 'Could not load the weather',
+        loading: 'Loading...',
+        today: 'Today',
+        days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        footer: '© 2026 Magida · Contact: info@magida.ge'
+      }
+    };
+
+    var lang = 'ka';
+    try {
+      var savedLang = localStorage.getItem('lang');
+      if (savedLang === 'ka' || savedLang === 'en') lang = savedLang;
+    } catch (e) {}
+
+    function t(key) {
+      return translations[lang][key];
+    }
+
+    function setLang(newLang) {
+      lang = newLang;
+      try { localStorage.setItem('lang', lang); } catch (e) {}
+      document.documentElement.lang = lang;
+      document.title = t('pageTitle');
+      var elements = document.querySelectorAll('[data-i18n]');
+      for (var i = 0; i < elements.length; i++) {
+        elements[i].textContent = t(elements[i].getAttribute('data-i18n'));
+      }
+      document.getElementById('btn-ka').classList.toggle('active', lang === 'ka');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      // რუკა და ამინდიც გადაითარგმნოს (თუ უკვე ჩაიტვირთა)
+      if (typeof renderMarkers === 'function') renderMarkers();
+      if (typeof renderWeather === 'function') renderWeather();
+    }
+
+    document.getElementById('btn-ka').addEventListener('click', function () { setLang('ka'); });
+    document.getElementById('btn-en').addEventListener('click', function () { setLang('en'); });
+
+    var bookButtons = document.querySelectorAll('.book');
+    for (var b = 0; b < bookButtons.length; b++) {
+      bookButtons[b].addEventListener('click', function () { alert(t('bookAlert')); });
+    }
+
+    setLang(lang);
+  </script>
+
+
+  <!-- ========== 3. სამზარეულოს ფილტრი ========== -->
+  <script>
+    var currentFilter = 'all';
+
+    function applyFilter(filter) {
+      currentFilter = filter;
+      var buttons = document.querySelectorAll('.filters button');
+      for (var i = 0; i < buttons.length; i++) {
+        buttons[i].classList.toggle('active', buttons[i].getAttribute('data-filter') === filter);
+      }
+      var cards = document.querySelectorAll('.card');
+      for (var j = 0; j < cards.length; j++) {
+        var match = filter === 'all' || cards[j].getAttribute('data-cuisine') === filter;
+        cards[j].style.display = match ? '' : 'none';
+      }
+      if (typeof renderMarkers === 'function') renderMarkers();
+    }
+
+    var filterButtons = document.querySelectorAll('.filters button');
+    for (var f = 0; f < filterButtons.length; f++) {
+      filterButtons[f].addEventListener('click', function () {
+        applyFilter(this.getAttribute('data-filter'));
+      });
+    }
+  </script>
+
+
+  <!-- ========== 4. რუკა (OpenStreetMap) ========== -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    var map = null;
+    var markersLayer = null;
+
+    function renderMarkers() {
+      if (!map) return;
+      markersLayer.clearLayers();
+      var cards = document.querySelectorAll('.card[data-lat]');
+      for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        if (card.style.display === 'none') continue;
+        var name = card.querySelector('h3').textContent;
+        var info = card.querySelector('p').textContent;
+        L.marker([parseFloat(card.getAttribute('data-lat')), parseFloat(card.getAttribute('data-lng'))])
+          .bindPopup('<b>' + name + '</b><br>' + info)
+          .addTo(markersLayer);
+      }
+    }
+
+    try {
+      map = L.map('map').setView([41.7100, 44.7800], 13);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+      markersLayer = L.layerGroup().addTo(map);
+      renderMarkers();
+    } catch (e) {
+      map = null;
+      document.getElementById('map').innerHTML = '<p class="note" style="padding:20px" data-i18n="mapError">' + t('mapError') + '</p>';
+    }
+  </script>
+
+
+  <!-- ========== 5. ამინდი (Open-Meteo, უფასო) ========== -->
+  <script>
+    var weatherData = null;
+    var weatherFailed = false;
+
+    function weatherIcon(code) {
+      if (code === 0) return '☀️';
+      if (code <= 2) return '🌤️';
+      if (code === 3) return '☁️';
+      if (code <= 48) return '🌫️';
+      if (code <= 67) return '🌧️';
+      if (code <= 77) return '❄️';
+      if (code <= 82) return '🌦️';
+      if (code <= 86) return '🌨️';
+      return '⛈️';
+    }
+
+    function renderWeather() {
+      var box = document.getElementById('weather');
+      if (weatherFailed) {
+        box.innerHTML = '<p class="note">' + t('weatherError') + '</p>';
+        return;
+      }
+      if (!weatherData) {
+        box.innerHTML = '<p class="note">' + t('loading') + '</p>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < weatherData.time.length; i++) {
+        var date = new Date(weatherData.time[i] + 'T12:00:00');
+        var dayName = i === 0 ? t('today') : t('days')[date.getDay()];
+        html += '<div class="day">'
+          + '<div class="day-name">' + dayName + '</div>'
+          + '<div class="day-date">' + date.getDate() + '/' + (date.getMonth() + 1) + '</div>'
+          + '<div class="icon">' + weatherIcon(weatherData.weather_code[i]) + '</div>'
+          + '<div class="temp"><b>' + Math.round(weatherData.temperature_2m_max[i]) + '°</b> '
+          + '<span>' + Math.round(weatherData.temperature_2m_min[i]) + '°</span></div>'
+          + '</div>';
+      }
+      box.innerHTML = html;
+    }
+
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=41.7151&longitude=44.8271'
+      + '&daily=weather_code,temperature_2m_max,temperature_2m_min'
+      + '&timezone=Asia%2FTbilisi&forecast_days=7')
+      .then(function (response) {
+        if (!response.ok) throw new Error('weather');
+        return response.json();
+      })
+      .then(function (data) {
+        weatherData = data.daily;
+        renderWeather();
+      })
+      .catch(function () {
+        weatherFailed = true;
+        renderWeather();
+      });
+  </script>
+
+</body>
+</html>
