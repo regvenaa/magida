@@ -1,459 +1,447 @@
-<!DOCTYPE html>
-<html lang="ka">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>მაგიდა — დაჯავშნე მაგიდა</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Noto Sans Georgian', sans-serif;
-      background: #000000;
-      color: #f5f5f5;
-    }
-    header {
-      background: #8B1E3F;
-      color: white;
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    header h1 { margin: 0; font-size: 30px; }
-    .header-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-    .clock { font-size: 16px; font-variant-numeric: tabular-nums; }
-    .clock b { font-size: 20px; }
-    .lang button {
-      background: transparent;
-      color: white;
-      border: 1px solid rgba(255,255,255,0.6);
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: inherit;
-      font-weight: 700;
-    }
-    .lang button.active { background: white; color: #8B1E3F; }
-    .hero {
-      text-align: center;
-      padding: 50px 20px 20px;
-    }
-    .hero h2 {
-      font-size: 28px;
-      color: #E8A0B4;
-    }
-    .section-title { color: #E8A0B4; padding: 0 20px; margin: 36px 0 14px; font-size: 22px; }
-    .filters { display: flex; gap: 10px; padding: 0 20px; flex-wrap: wrap; justify-content: center; }
-    .filters button {
-      background: #1c1c1c;
-      color: #f5f5f5;
-      border: 1px solid #333333;
-      padding: 8px 18px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    .filters button.active { background: #8B1E3F; border-color: #8B1E3F; }
-    .restaurants {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 20px;
-      padding: 20px;
-      overflow-x: auto;
-    }
-    .card {
-      flex: 1;
-      min-width: 220px;
-      background: #1c1c1c;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(255,255,255,0.08);
-    }
-    .card img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-    .card button {
-      background: #8B1E3F;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    .tag {
-      display: inline-block;
-      font-size: 12px;
-      background: #2a2a2a;
-      color: #E8A0B4;
-      padding: 3px 10px;
-      border-radius: 12px;
-    }
-    #map {
-      height: 400px;
-      margin: 0 20px;
-      border-radius: 12px;
-      background: #1c1c1c;
-      color: #999999;
-    }
-    .weather { display: flex; gap: 12px; padding: 0 20px; overflow-x: auto; }
-    .day {
-      flex: 1;
-      min-width: 90px;
-      background: #1c1c1c;
-      border-radius: 12px;
-      padding: 14px 8px;
-      text-align: center;
-    }
-    .day-name { font-weight: 700; }
-    .day-date { font-size: 12px; color: #999999; }
-    .icon { font-size: 30px; margin: 8px 0; }
-    .temp span { color: #999999; }
-    .note { color: #999999; padding: 0 20px; }
-    footer {
-      background: #1c1c1c;
-      color: #aaaaaa;
-      text-align: center;
-      padding: 20px;
-      margin-top: 40px;
-    }
-  </style>
-</head>
-<body>
+<title>ღამე — სასტუმროები</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&family=Noto+Serif+Georgian:wght@600;800&display=swap">
+<style>
+/* Layout: search band on top, filter rail left + result list right; stacks to one column on phones */
+:root{
+  --bg:#f4f6f4; --surface:#ffffff; --sunk:#eaeeeb; --ink:#1c2321; --muted:#5d6864; --line:#dbe1dd;
+  --accent:#7a1f3d; --accent-ink:#ffffff; --accent-soft:#f5e6eb;
+  --score:#2e5a4d; --score-ink:#ffffff; --warn:#a4501b;
+  --display:"Noto Serif Georgian", Georgia, serif;
+  --body:"Noto Sans Georgian", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111614; --surface:#1a201e; --sunk:#232a27; --ink:#e7ece9; --muted:#9ba7a2; --line:#2d3532;
+  --accent:#e07a9a; --accent-ink:#22080f; --accent-soft:#3a1c26;
+  --score:#78b9a4; --score-ink:#0e1a16; --warn:#e69a62; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#111614; --surface:#1a201e; --sunk:#232a27; --ink:#e7ece9; --muted:#9ba7a2; --line:#2d3532;
+  --accent:#e07a9a; --accent-ink:#22080f; --accent-soft:#3a1c26;
+  --score:#78b9a4; --score-ink:#0e1a16; --warn:#e69a62; color-scheme:dark }
 
-  <!-- ===== ზედა ზოლი: სახელი + თბილისის დრო + ენა ===== -->
-  <header>
-    <h1>🍽️ <span data-i18n="brand">მაგიდა</span></h1>
-    <div class="header-right">
-      <div class="clock">🕒 <span data-i18n="tbilisi">თბილისი</span> <b id="clock">--:--:--</b></div>
-      <div class="lang">
-        <button type="button" id="btn-ka" class="active">GEO</button>
-        <button type="button" id="btn-en">ENG</button>
-      </div>
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0}
+
+/* header */
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px}
+.brand{display:flex;align-items:baseline;gap:8px;font-family:var(--display);font-weight:800;font-size:26px;color:var(--accent);letter-spacing:.01em}
+.brand small{font-family:var(--body);font-weight:500;font-size:12px;color:var(--muted);letter-spacing:.04em}
+.navbtns{display:flex;gap:8px}
+.ghost{background:none;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:14px}
+.ghost:hover{border-color:var(--accent);color:var(--accent)}
+.count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:12px;text-align:center}
+
+/* hero + search */
+.hero{padding-block:22px 28px}
+.hero h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,4.2vw,40px);line-height:1.2;max-width:22ch}
+.hero p{color:var(--muted);margin:8px 0 20px;max-width:60ch}
+.search{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 6px 24px -14px rgba(20,30,25,.35)}
+.field{display:flex;flex-direction:column;padding:10px 14px;border-right:1px solid var(--line);min-width:0}
+.field label{font-size:11.5px;font-weight:600;letter-spacing:.06em;color:var(--muted)}
+.field input,.field select{border:0;background:transparent;padding:2px 0;font-size:15px;min-width:0;width:100%}
+.field input:focus,.field select:focus{outline:none}
+.field:focus-within{background:var(--accent-soft)}
+.search .go{border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;padding:0 28px;font-size:16px}
+.search .go:hover{filter:brightness(1.08)}
+.err{color:var(--warn);font-size:13.5px;margin-top:8px;min-height:1em}
+@media (max-width:820px){
+  .search{grid-template-columns:1fr 1fr}
+  .field:first-child{grid-column:1/-1}
+  .field{border-bottom:1px solid var(--line)}
+  .field:nth-child(3),.field:nth-child(4){border-right:0}
+  .field:nth-child(4){grid-column:1/-1}
+  .search .go{grid-column:1/-1;padding:13px}
+}
+
+/* main layout */
+main .wrap{display:grid;grid-template-columns:250px 1fr;gap:28px;padding-block:8px 48px;align-items:start}
+@media (max-width:820px){main .wrap{grid-template-columns:1fr;gap:16px}}
+
+.filters{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:4px 16px 16px}
+.filters summary{font-weight:700;padding:12px 0;cursor:pointer;list-style:none;display:flex;justify-content:space-between}
+.filters summary::-webkit-details-marker{display:none}
+.filters summary::after{content:"＋";color:var(--muted)}
+.filters[open] summary::after{content:"－"}
+.fgroup{border-top:1px solid var(--line);padding-block:14px;display:flex;flex-direction:column;gap:8px}
+.fgroup h3{font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+.check{display:flex;align-items:center;gap:9px;font-size:14.5px;cursor:pointer}
+.check input{width:17px;height:17px;accent-color:var(--accent)}
+.range{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.reset{align-self:flex-start;background:none;border:0;color:var(--accent);padding:0;font-weight:600;font-size:14px;margin-top:12px}
+
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.toolbar h2{font-family:var(--display);font-size:21px;font-weight:600}
+.toolbar select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.list{display:flex;flex-direction:column;gap:14px;min-width:0}
+
+/* card */
+.card{display:grid;grid-template-columns:240px 1fr auto;gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;transition:border-color .15s}
+.card:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.thumb{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/3;max-width:100%;background:var(--sunk)}
+.thumb svg{display:block;width:100%;height:100%}
+.fav{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.92);display:grid;place-items:center;color:#7a1f3d}
+.fav svg{width:18px;height:18px}
+.info{min-width:0;display:flex;flex-direction:column;gap:6px}
+.info h3{font-family:var(--display);font-size:19px;font-weight:600;line-height:1.3}
+.info h3 button{all:unset;cursor:pointer}
+.info h3 button:hover{color:var(--accent)}
+.stars{color:#c48a1a;letter-spacing:1px;font-size:13px}
+.loc{font-size:13.5px;color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.tag{font-size:12.5px;padding:2px 9px;border-radius:999px;background:var(--sunk);color:var(--muted)}
+.blurb{font-size:14px;color:var(--muted);margin:0;max-width:60ch}
+.left{font-size:13px;color:var(--warn);font-weight:600}
+.side{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:12px;text-align:right;min-width:150px}
+.score{display:flex;align-items:center;gap:8px}
+.score b{display:grid;place-items:center;min-width:40px;height:36px;border-radius:8px 8px 8px 2px;background:var(--score);color:var(--score-ink);font-size:15px;font-variant-numeric:tabular-nums}
+.score span{font-size:13.5px;line-height:1.25}
+.score small{display:block;color:var(--muted);font-size:12px}
+.price small{display:block;color:var(--muted);font-size:12.5px}
+.price strong{font-size:22px;font-variant-numeric:tabular-nums}
+.price .per{font-size:12.5px;color:var(--muted)}
+.cta{border:0;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:600;padding:9px 16px}
+.cta:hover{filter:brightness(1.08)}
+.cta:disabled{opacity:.45;cursor:not-allowed;filter:none}
+@media (max-width:820px){
+  .card{grid-template-columns:1fr}
+  .side{flex-direction:row;align-items:flex-end;text-align:left;min-width:0;border-top:1px solid var(--line);padding-top:12px}
+  .side .score{order:-1}
+}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:32px;text-align:center;color:var(--muted)}
+
+/* dialog */
+dialog{border:0;padding:0;border-radius:14px;background:var(--surface);color:var(--ink);width:min(760px,calc(100vw - 24px));max-height:calc(100dvh - 24px);box-shadow:0 30px 80px -20px rgba(0,0,0,.5)}
+dialog::backdrop{background:rgba(12,18,16,.55)}
+.dlg-head{position:relative}
+.dlg-head .thumb{aspect-ratio:21/8;border-radius:0}
+.x{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#1c2321;font-size:20px;line-height:1}
+.dlg-body{padding:18px 22px 22px;display:flex;flex-direction:column;gap:14px}
+.dlg-body h2{font-family:var(--display);font-size:24px;font-weight:600}
+.rooms{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.room{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.room:first-child{border-top:0}
+.room h4{margin:0;font-size:15px}
+.room p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.room .rp{text-align:right;font-variant-numeric:tabular-nums}
+.room .rp strong{display:block;font-size:17px}
+.room .rp small{color:var(--muted);font-size:12px}
+@media (max-width:560px){.room{grid-template-columns:1fr auto}.room .cta{grid-column:1/-1}}
+.summary{background:var(--sunk);border-radius:var(--r);padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px 16px;font-size:14px}
+.summary dt{color:var(--muted);font-size:12px;letter-spacing:.04em}
+.summary dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+form.book{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+form.book .full{grid-column:1/-1}
+@media (max-width:560px){form.book{grid-template-columns:1fr}}
+.inp{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted)}
+.inp input,.inp textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 11px;font-size:15px;font-weight:400;color:var(--ink);font-family:inherit}
+.inp input:focus,.inp textarea:focus{outline:none;border-color:var(--accent)}
+.inp .e{color:var(--warn);font-weight:500;min-height:1em}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.back{background:none;border:0;color:var(--accent);font-weight:600;padding:0}
+.done{text-align:center;padding:10px 0 4px;display:flex;flex-direction:column;gap:10px;align-items:center}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:24px;letter-spacing:.12em;background:var(--accent-soft);color:var(--accent);padding:8px 18px;border-radius:8px}
+.note{font-size:12.5px;color:var(--muted)}
+.blist{display:flex;flex-direction:column;gap:10px}
+.bitem{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.bitem .code{font-size:14px;padding:3px 8px}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer .wrap{padding-block:18px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header>
+  <div class="wrap">
+    <div class="brand">ღამე <small>სასტუმროები საქართველოში</small></div>
+    <div class="navbtns">
+      <button class="ghost" id="favBtn" aria-pressed="false">რჩეულები<span class="count" id="favCount">0</span></button>
+      <button class="ghost" id="myBtn">ჩემი ჯავშნები</button>
     </div>
-  </header>
-
-  <!-- ===== ძველი ნაწილი: მთავარი ტექსტი ===== -->
-  <section class="hero">
-    <h2 data-i18n="heroTitle">დაჯავშნე მაგიდა საქართველოს რესტორნებში</h2>
-    <p data-i18n="heroText">რესტორნები, ბარები და კაფეები — ერთ ადგილას</p>
-  </section>
-
-  <!-- ===== ახალი: სამზარეულოს ჩამონათვალი ===== -->
-  <div class="filters">
-    <button type="button" class="active" data-filter="all" data-i18n="all">ყველა</button>
-    <button type="button" data-filter="georgian" data-i18n="georgian">ქართული</button>
-    <button type="button" data-filter="european" data-i18n="european">ევროპული</button>
-    <button type="button" data-filter="asian" data-i18n="asian">აზიური</button>
   </div>
+</header>
 
-  <!-- ===== ძველი ნაწილი: რესტორნების ბარათები (+ 2 ახალი) ===== -->
-  <section class="restaurants">
-    <div class="card" data-cuisine="georgian" data-lat="41.6925" data-lng="44.8070">
-      <span class="tag" data-i18n="georgian">ქართული</span>
-      <h3 data-i18n="r1name">სამაგალითო რესტორანი 1</h3>
-      <p data-i18n="r1info">📍 თბილისი · ქართული სამზარეულო</p>
-      <button type="button" class="book" data-i18n="book">დაჯავშნა</button>
-    </div>
-    <div class="card" data-cuisine="georgian">
-      <span class="tag" data-i18n="georgian">ქართული</span>
-      <h3 data-i18n="r2name">სამაგალითო ბარი 2</h3>
-      <p data-i18n="r2info">📍 ბათუმი · ღვინის ბარი</p>
-      <button type="button" class="book" data-i18n="book">დაჯავშნა</button>
-    </div>
-    <div class="card" data-cuisine="european">
-      <span class="tag" data-i18n="european">ევროპული</span>
-      <h3 data-i18n="r3name">სამაგალითო კაფე 3</h3>
-      <p data-i18n="r3info">📍 ქუთაისი · კაფე</p>
-      <button type="button" class="book" data-i18n="book">დაჯავშნა</button>
-    </div>
-    <div class="card" data-cuisine="georgian">
-      <span class="tag" data-i18n="georgian">ქართული</span>
-      <h3 data-i18n="r4name">სამაგალითო რესტორანი 4</h3>
-      <p data-i18n="r4info">📍 თელავი · კახური სამზარეულო</p>
-      <button type="button" class="book" data-i18n="book">დაჯავშნა</button>
-    </div>
-    <div class="card" data-cuisine="european" data-lat="41.7095" data-lng="44.7650">
-      <span class="tag" data-i18n="european">ევროპული</span>
-      <h3 data-i18n="r5name">სამაგალითო ბისტრო 5</h3>
-      <p data-i18n="r5info">📍 თბილისი, ვაკე · ევროპული სამზარეულო</p>
-      <button type="button" class="book" data-i18n="book">დაჯავშნა</button>
-    </div>
-    <div class="card" data-cuisine="asian" data-lat="41.7270" data-lng="44.7520">
-      <span class="tag" data-i18n="asian">აზიური</span>
-      <h3 data-i18n="r6name">სამაგალითო სუში 6</h3>
-      <p data-i18n="r6info">📍 თბილისი, საბურთალო · აზიური სამზარეულო</p>
-      <button type="button" class="book" data-i18n="book">დაჯავშნა</button>
-    </div>
-  </section>
+<section class="hero">
+  <div class="wrap">
+    <h1>იპოვე ღამის გასათევი ნებისმიერ კუთხეში</h1>
+    <p>ძველი თბილისის სახლებიდან სვანურ კოშკებამდე. ფასი ლარშია და მოიცავს გადასახადებს.</p>
+    <form class="search" id="searchForm" novalidate>
+      <div class="field">
+        <label for="dest">მიმართულება</label>
+        <input id="dest" list="cities" placeholder="ქალაქი ან რეგიონი" autocomplete="off">
+        <datalist id="cities"></datalist>
+      </div>
+      <div class="field"><label for="ci">შესვლა</label><input type="date" id="ci"></div>
+      <div class="field"><label for="co">გასვლა</label><input type="date" id="co"></div>
+      <div class="field">
+        <label for="guests">სტუმრები</label>
+        <select id="guests">
+          <option value="1">1 სტუმარი</option><option value="2" selected>2 სტუმარი</option>
+          <option value="3">3 სტუმარი</option><option value="4">4 სტუმარი</option>
+        </select>
+      </div>
+      <button class="go" type="submit">ძებნა</button>
+    </form>
+    <div class="err" id="searchErr" role="alert"></div>
+  </div>
+</section>
 
-  <!-- ===== ახალი: რუკა ===== -->
-  <h2 class="section-title" data-i18n="mapTitle">რესტორნები თბილისის რუკაზე</h2>
-  <div id="map"></div>
+<main>
+  <div class="wrap">
+    <details class="filters" id="filters" open>
+      <summary>ფილტრები</summary>
+      <div class="fgroup">
+        <h3>ფასი ღამეში</h3>
+        <input type="range" id="maxPrice" min="80" max="400" step="10" value="400" aria-label="მაქსიმალური ფასი ღამეში">
+        <div class="range"><span>80 ₾</span><span id="maxPriceLbl">400 ₾-მდე</span></div>
+      </div>
+      <div class="fgroup" id="starBox"><h3>ვარსკვლავები</h3></div>
+      <div class="fgroup">
+        <h3>სტუმრების შეფასება</h3>
+        <label class="check"><input type="radio" name="rating" value="0" checked> ნებისმიერი</label>
+        <label class="check"><input type="radio" name="rating" value="8"> ძალიან კარგი: 8+</label>
+        <label class="check"><input type="radio" name="rating" value="8.5"> შესანიშნავი: 8.5+</label>
+        <label class="check"><input type="radio" name="rating" value="9"> საუკეთესო: 9+</label>
+      </div>
+      <div class="fgroup" id="amenBox"><h3>კეთილმოწყობა</h3></div>
+      <button class="reset" type="button" id="resetBtn">ფილტრების გასუფთავება</button>
+    </details>
 
-  <!-- ===== ახალი: ამინდი ===== -->
-  <h2 class="section-title" data-i18n="weatherTitle">ამინდი თბილისში — 7 დღე</h2>
-  <div class="weather" id="weather"><p class="note" data-i18n="loading">იტვირთება...</p></div>
+    <section>
+      <div class="toolbar">
+        <h2 id="resultTitle">სასტუმროები</h2>
+        <select id="sort" aria-label="დალაგება">
+          <option value="rec">რეკომენდებული</option>
+          <option value="pa">ფასი: იაფიდან</option>
+          <option value="pd">ფასი: ძვირიდან</option>
+          <option value="rt">შეფასება: მაღლიდან</option>
+        </select>
+      </div>
+      <div class="list" id="list"></div>
+    </section>
+  </div>
+</main>
 
-  <!-- ===== ძველი ნაწილი: ქვედა ზოლი ===== -->
-  <footer>
-    <p data-i18n="footer">© 2026 მაგიდა · კონტაქტი: info@magida.ge</p>
-  </footer>
+<footer><div class="wrap">ღამე — სადემონსტრაციო საიტი. ჯავშნები ინახება მხოლოდ თქვენს ბრაუზერში და რეალურად არ იგზავნება.</div></footer>
 
+<dialog id="dlg"><div id="dlgIn"></div></dialog>
 
-  <!-- ========== 1. თბილისის საათი ========== -->
-  <script>
-    function updateClock() {
-      // საქართველო ყოველთვის UTC+4-შია (ზაფხულის დრო არ გვაქვს)
-      var now = new Date(Date.now() + 4 * 60 * 60 * 1000);
-      var h = String(now.getUTCHours()).padStart(2, '0');
-      var m = String(now.getUTCMinutes()).padStart(2, '0');
-      var s = String(now.getUTCSeconds()).padStart(2, '0');
-      document.getElementById('clock').textContent = h + ':' + m + ':' + s;
-    }
-    updateClock();
-    setInterval(updateClock, 1000);
-  </script>
+<script>
+const AMEN = {wifi:"უფასო Wi-Fi", bf:"საუზმე", park:"პარკინგი", pool:"აუზი", spa:"სპა", wine:"ღვინის დეგუსტაცია", pets:"შინაური ცხოველები"};
+const HOTELS = [
+ {id:1,name:"ძველი უბნის სახლი",city:"თბილისი",area:"სოლოლაკი",scene:"city",stars:4,score:9.1,reviews:412,price:185,am:["wifi","bf"],left:2,blurb:"XIX საუკუნის სახლი ხის აივნებით, თავისუფლების მოედნიდან 6 წუთის სავალზე."},
+ {id:2,name:"მტკვრის ლოფტები",city:"თბილისი",area:"ავლაბარი",scene:"city2",stars:3,score:8.6,reviews:288,price:140,am:["wifi","pets"],blurb:"აგურის ლოფტები მდინარის ხედით, მეტრო ავლაბრიდან 3 წუთში."},
+ {id:3,name:"ზღვისპირა 51",city:"ბათუმი",area:"ბულვარი",scene:"sea",stars:5,score:8.9,reviews:1034,price:320,am:["wifi","bf","pool","spa","park"],blurb:"პანორამული ოთახები შავი ზღვის ხედით და აუზი სახურავზე."},
+ {id:4,name:"მწვანე კონცხის ვილა",city:"ბათუმი",area:"მწვანე კონცხი",scene:"sea2",stars:4,score:9.3,reviews:197,price:260,am:["wifi","bf","park","pool"],left:1,blurb:"ბოტანიკური ბაღის გვერდით, საკუთარი ბილიკით სანაპიროსკენ."},
+ {id:5,name:"ქვის სახლი სტეფანწმინდაში",city:"სტეფანწმინდა",area:"ყაზბეგი",scene:"mount",stars:3,score:9.4,reviews:356,price:210,am:["wifi","bf","park"],blurb:"ფანჯრიდან მყინვარწვერი და გერგეტის სამება ჩანს."},
+ {id:6,name:"გერგეტის ხედი",city:"სტეფანწმინდა",area:"გერგეტი",scene:"mount2",stars:4,score:8.7,reviews:521,price:290,am:["wifi","bf","spa","park"],blurb:"თბილი ტერასა, სპა და სალაშქრო მარშრუტების რუკა მისაღებში."},
+ {id:7,name:"ალაზნის ფანჯარა",city:"სიღნაღი",area:"ციხე-ქალაქი",scene:"vine",stars:4,score:9.0,reviews:244,price:230,am:["wifi","bf","wine","park"],blurb:"ალაზნის ველზე გადაშლილი ხედი და საკუთარი საფერავი."},
+ {id:8,name:"კახური მარანი",city:"თელავი",area:"ქვემო ქალაქი",scene:"vine2",stars:3,score:8.4,reviews:173,price:120,am:["wifi","bf","wine","park","pets"],blurb:"საოჯახო მარანი ქვევრებით და კახური საუზმით."},
+ {id:9,name:"სვანური კოშკი",city:"მესტია",area:"სეტი",scene:"tower",stars:3,score:9.6,reviews:139,price:175,am:["wifi","bf"],left:2,blurb:"აღდგენილი კოშკის გვერდით სახლი, ბუხრით და სვანური ვახშმით."},
+ {id:10,name:"ბორჯომის პარკის სასტუმრო",city:"ბორჯომი",area:"მინერალური წყლების პარკი",scene:"forest",stars:4,score:8.2,reviews:610,price:195,am:["wifi","bf","spa","pool","park"],blurb:"ტყის პირას, გოგირდის აბაზანებამდე საბაგიროთი 10 წუთი."},
+ {id:11,name:"ქუთაისის ბაღი",city:"ქუთაისი",area:"ცენტრი",scene:"city3",stars:2,score:8.0,reviews:92,price:85,am:["wifi","pets"],blurb:"მყუდრო სასტუმრო ეზოთი, კოლხეთის შადრევანთან ახლოს."},
+ {id:12,name:"გუდაურის თოვლის სახლი",city:"გუდაური",area:"ზემო ბაზა",scene:"snow",stars:4,score:8.8,reviews:301,price:340,am:["wifi","bf","spa","park"],blurb:"სათხილამურო ტრასაზე პირდაპირი გასასვლელი და საშრობი ოთახი."}
+];
 
+/* ---------- illustrated covers (SVG, no external images) ---------- */
+let gid=0;
+function scene(kind){
+  const g="g"+(++gid);
+  const P = {
+    city:  ["#e9cfc4","#f6ece6","#c47a5a"], city2:["#cbd6e2","#eef1f5","#7d8fa6"], city3:["#d9e4cf","#f2f5ee","#8aa06b"],
+    sea:   ["#f2c9a0","#fbe9d6","#e88a4a"], sea2:["#cfe3ea","#f2f8fa","#3e8aa8"],
+    mount: ["#c4d7e6","#eef4f8","#ffffff"], mount2:["#d9cfe6","#f3eff8","#fff4d6"], snow:["#d6e6f2","#f6fafc","#ffffff"],
+    vine:  ["#f0dcb0","#faf2e0","#e9a842"], vine2:["#e7d4c9","#f8efe9","#c86a4a"],
+    tower: ["#c9d9cf","#eef5f1","#fff2cc"], forest:["#d2e2d4","#eff6f0","#f5e8b8"]
+  }[kind];
+  let body="";
+  const sky=`<defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${P[0]}"/><stop offset="1" stop-color="${P[1]}"/></linearGradient></defs><rect width="320" height="240" fill="url(#${g})"/><circle cx="238" cy="70" r="24" fill="${P[2]}" opacity=".9"/>`;
+  const peaks=(c,s)=>`<path d="M0 170 L70 80 L110 120 L165 50 L225 125 L265 95 L320 150 L320 240 L0 240Z" fill="${c}"/>`+(s?`<path d="M152 66 L165 50 L180 70 L170 66 L162 74Z M62 90 L70 80 L80 94 L71 90Z" fill="#fff"/>`:"");
+  if(kind.startsWith("city")){
+    const roofs=["#b5523b","#8e3a2f","#c9774f","#6e4a3a"];
+    let houses="";
+    for(let i=0;i<9;i++){const x=i*36-4,h=40+((i*37)%30),y=200-h;
+      houses+=`<rect x="${x}" y="${y}" width="34" height="${h+40}" fill="${["#efe2d3","#e4d2bf","#f4ebe0"][i%3]}"/><path d="M${x-2} ${y} L${x+17} ${y-14} L${x+36} ${y}Z" fill="${roofs[i%4]}"/><rect x="${x+8}" y="${y+12}" width="7" height="10" fill="#5a6b73"/><rect x="${x+20}" y="${y+12}" width="7" height="10" fill="#5a6b73"/><rect x="${x+4}" y="${y+30}" width="26" height="3" fill="#8a5a3c"/>`;}
+    body=`<path d="M0 150 Q80 110 160 130 T320 120 L320 240 L0 240Z" fill="#9aa88a"/><path d="M40 128 L60 104 L64 128Z M60 104 L120 112 L120 128 L60 128Z" fill="#7d6a58"/>${houses}<rect y="220" width="320" height="20" fill="#5f7f8a"/>`;
+  } else if(kind.startsWith("sea")){
+    body=`<rect y="150" width="320" height="90" fill="#2f6f8a"/><path d="M0 165 h320 M20 182 h80 M150 196 h120 M40 212 h90" stroke="#9cc6d6" stroke-width="2" opacity=".6"/>`+
+    (kind==="sea"?`<rect x="20" y="70" width="34" height="80" fill="#e8ecef"/><rect x="60" y="40" width="28" height="110" fill="#d4dbe0"/><rect x="94" y="88" width="40" height="62" fill="#eef1f3"/>${Array.from({length:8},(_,i)=>`<rect x="${64}" y="${48+i*12}" width="20" height="5" fill="#7fa3b5"/>`).join("")}`
+     :`<path d="M0 150 Q60 90 140 120 L160 150Z" fill="#3f6b45"/><circle cx="40" cy="118" r="14" fill="#2f5838"/><circle cx="80" cy="110" r="18" fill="#365f3e"/><rect x="96" y="112" width="34" height="26" fill="#f2ede4"/><path d="M93 112 L113 98 L133 112Z" fill="#b5523b"/>`);
+  } else if(kind==="mount"||kind==="mount2"||kind==="snow"){
+    body=peaks("#6f7f8f",true)+`<path d="M0 200 Q100 160 200 185 T320 175 L320 240 L0 240Z" fill="${kind==="snow"?"#e8eff4":"#6f8a5c"}"/>`+
+    (kind==="snow"?`<path d="M30 230 L130 190 M150 232 L260 196" stroke="#b9c9d4" stroke-width="3"/><rect x="200" y="150" width="54" height="40" fill="#7a4e36"/><path d="M194 152 L227 126 L260 152Z" fill="#fff"/>`
+     :`<path d="M188 90 L196 70 L204 90Z" fill="#5a4a3c"/><rect x="190" y="90" width="12" height="10" fill="#7c6a58"/><rect x="40" y="180" width="44" height="30" fill="#a89a88"/><path d="M36 182 L62 164 L88 182Z" fill="#5d4b3d"/>`);
+  } else if(kind.startsWith("vine")){
+    let rows="";for(let i=0;i<7;i++)rows+=`<path d="M${-20+i*10} ${240} Q160 ${170+i*4} ${340-i*8} ${190+i*7}" stroke="#4f7a3a" stroke-width="5" fill="none" opacity=".75"/>`;
+    body=`<path d="M0 130 L60 100 L120 118 L190 92 L260 110 L320 96 L320 160 L0 160Z" fill="#8ea3bf"/><path d="M0 160 Q160 140 320 158 L320 240 L0 240Z" fill="#9dbb6f"/>${rows}`+
+    (kind==="vine"?`<path d="M240 160 L240 128 L246 120 L252 128 L252 160Z M256 160 L256 136 L290 136 L290 160Z" fill="#c9a77a"/>`:`<ellipse cx="70" cy="200" rx="18" ry="24" fill="#a7663f"/><ellipse cx="110" cy="206" rx="14" ry="19" fill="#93573a"/>`);
+  } else if(kind==="tower"){
+    body=peaks("#7a8a7f",true)+`<path d="M0 190 Q160 160 320 190 L320 240 L0 240Z" fill="#6c8a5a"/><rect x="128" y="88" width="30" height="110" fill="#c9bfae"/><path d="M124 90 L143 72 L162 90Z" fill="#7a6a5a"/>${[100,124,148].map(y=>`<rect x="138" y="${y}" width="8" height="10" fill="#5a4e42"/>`).join("")}<rect x="160" y="160" width="60" height="38" fill="#b9ad98"/><path d="M156 162 L190 144 L224 162Z" fill="#6e5e4e"/>`;
+  } else {
+    let trees="";for(let i=0;i<14;i++){const x=i*24-6,h=50+((i*53)%40);trees+=`<path d="M${x} 210 L${x+14} ${210-h} L${x+28} 210Z" fill="${["#2f5a3e","#3d6e4a","#264c35"][i%3]}"/>`;}
+    body=`<path d="M0 140 Q160 90 320 140 L320 240 L0 240Z" fill="#5f8a64"/>${trees}<rect y="206" width="320" height="34" fill="#4a6b4f"/><rect x="120" y="170" width="80" height="44" fill="#efe6d6"/><path d="M114 172 L160 146 L206 172Z" fill="#8e3a2f"/>`;
+  }
+  return `<svg viewBox="0 0 320 240" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${sky}${body}</svg>`;
+}
 
-  <!-- ========== 2. ენის შეცვლა (GEO / ENG) ========== -->
-  <script>
-    var translations = {
-      ka: {
-        pageTitle: 'მაგიდა — დაჯავშნე მაგიდა',
-        brand: 'მაგიდა',
-        tbilisi: 'თბილისი',
-        heroTitle: 'დაჯავშნე მაგიდა საქართველოს რესტორნებში',
-        heroText: 'რესტორნები, ბარები და კაფეები — ერთ ადგილას',
-        all: 'ყველა',
-        georgian: 'ქართული',
-        european: 'ევროპული',
-        asian: 'აზიური',
-        r1name: 'სამაგალითო რესტორანი 1',
-        r1info: '📍 თბილისი · ქართული სამზარეულო',
-        r2name: 'სამაგალითო ბარი 2',
-        r2info: '📍 ბათუმი · ღვინის ბარი',
-        r3name: 'სამაგალითო კაფე 3',
-        r3info: '📍 ქუთაისი · კაფე',
-        r4name: 'სამაგალითო რესტორანი 4',
-        r4info: '📍 თელავი · კახური სამზარეულო',
-        r5name: 'სამაგალითო ბისტრო 5',
-        r5info: '📍 თბილისი, ვაკე · ევროპული სამზარეულო',
-        r6name: 'სამაგალითო სუში 6',
-        r6info: '📍 თბილისი, საბურთალო · აზიური სამზარეულო',
-        book: 'დაჯავშნა',
-        bookAlert: 'დაჯავშნის ფუნქცია მალე დაემატება!',
-        mapTitle: 'რესტორნები თბილისის რუკაზე',
-        mapError: 'რუკის ჩატვირთვა ვერ მოხერხდა',
-        weatherTitle: 'ამინდი თბილისში — 7 დღე',
-        weatherError: 'ამინდის ჩატვირთვა ვერ მოხერხდა',
-        loading: 'იტვირთება...',
-        today: 'დღეს',
-        days: ['კვი', 'ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ'],
-        footer: '© 2026 მაგიდა · კონტაქტი: info@magida.ge'
-      },
-      en: {
-        pageTitle: 'Magida — Book a table',
-        brand: 'Magida',
-        tbilisi: 'Tbilisi',
-        heroTitle: 'Book a table at restaurants across Georgia',
-        heroText: 'Restaurants, bars and cafés — all in one place',
-        all: 'All',
-        georgian: 'Georgian',
-        european: 'European',
-        asian: 'Asian',
-        r1name: 'Sample Restaurant 1',
-        r1info: '📍 Tbilisi · Georgian cuisine',
-        r2name: 'Sample Bar 2',
-        r2info: '📍 Batumi · Wine bar',
-        r3name: 'Sample Café 3',
-        r3info: '📍 Kutaisi · Café',
-        r4name: 'Sample Restaurant 4',
-        r4info: '📍 Telavi · Kakhetian cuisine',
-        r5name: 'Sample Bistro 5',
-        r5info: '📍 Tbilisi, Vake · European cuisine',
-        r6name: 'Sample Sushi 6',
-        r6info: '📍 Tbilisi, Saburtalo · Asian cuisine',
-        book: 'Book',
-        bookAlert: 'Booking is coming soon!',
-        mapTitle: 'Restaurants on the Tbilisi map',
-        mapError: 'Could not load the map',
-        weatherTitle: 'Tbilisi weather — 7 days',
-        weatherError: 'Could not load the weather',
-        loading: 'Loading...',
-        today: 'Today',
-        days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-        footer: '© 2026 Magida · Contact: info@magida.ge'
-      }
-    };
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const fmt=n=>new Intl.NumberFormat("ka-GE").format(Math.round(n))+" ₾";
+const word=s=>s>=9?"საუკეთესო":s>=8.5?"შესანიშნავი":s>=8?"ძალიან კარგი":"კარგი";
+const iso=d=>d.toISOString().slice(0,10);
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const nicedate=s=>new Date(s+"T12:00").toLocaleDateString("ka-GE",{day:"numeric",month:"short"});
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k)||"null");localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+const heart=f=>`<svg viewBox="0 0 24 24" fill="${f?"currentColor":"none"}" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-9.5-9.3C1 8.2 3.3 4.5 7 4.5c2.1 0 3.6 1.2 5 3 1.4-1.8 2.9-3 5-3 3.7 0 6 3.7 4.5 7.2C19.5 16.4 12 21 12 21z"/></svg>`;
+function rooms(h){return [
+  {n:"სტანდარტული ორადგილიანი",d:"1 ორადგილიანი საწოლი · 20 მ²",cap:2,p:h.price},
+  {n:"დელუქს ოთახი ხედით",d:"დიდი საწოლი, აივანი · 28 მ²",cap:3,p:h.price*1.35},
+  {n:"საოჯახო ლუქსი",d:"2 ოთახი, 3 საწოლი · 42 მ²",cap:4,p:h.price*1.8}
+]}
 
-    var lang = 'ka';
-    try {
-      var savedLang = localStorage.getItem('lang');
-      if (savedLang === 'ka' || savedLang === 'en') lang = savedLang;
-    } catch (e) {}
+/* ---------- state ---------- */
+const today=new Date();
+const S={dest:"",ci:iso(addDays(today,7)),co:iso(addDays(today,10)),guests:2,max:400,stars:new Set(),rating:0,am:new Set(),sort:"rec",favOnly:false,
+  favs:new Set(store("ghame-favs")||[]),bookings:store("ghame-bookings")||[]};
+const nights=()=>Math.max(0,Math.round((new Date(S.co)-new Date(S.ci))/864e5));
 
-    function t(key) {
-      return translations[lang][key];
-    }
+/* ---------- build filters ---------- */
+$("#cities").innerHTML=[...new Set(HOTELS.map(h=>h.city))].map(c=>`<option value="${c}">`).join("");
+$("#ci").value=S.ci;$("#co").value=S.co;$("#ci").min=iso(today);
+$("#starBox").insertAdjacentHTML("beforeend",[5,4,3,2].map(s=>`<label class="check"><input type="checkbox" value="${s}" data-star> <span class="stars">${"★".repeat(s)}</span></label>`).join(""));
+$("#amenBox").insertAdjacentHTML("beforeend",Object.entries(AMEN).map(([k,v])=>`<label class="check"><input type="checkbox" value="${k}" data-am> ${v}</label>`).join(""));
+if(matchMedia("(max-width:820px)").matches)$("#filters").open=false;
 
-    function setLang(newLang) {
-      lang = newLang;
-      try { localStorage.setItem('lang', lang); } catch (e) {}
-      document.documentElement.lang = lang;
-      document.title = t('pageTitle');
-      var elements = document.querySelectorAll('[data-i18n]');
-      for (var i = 0; i < elements.length; i++) {
-        elements[i].textContent = t(elements[i].getAttribute('data-i18n'));
-      }
-      document.getElementById('btn-ka').classList.toggle('active', lang === 'ka');
-      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-      // რუკა და ამინდიც გადაითარგმნოს (თუ უკვე ჩაიტვირთა)
-      if (typeof renderMarkers === 'function') renderMarkers();
-      if (typeof renderWeather === 'function') renderWeather();
-    }
+/* ---------- render list ---------- */
+function render(){
+  const n=nights();
+  let L=HOTELS.filter(h=>
+    (!S.dest||(h.city+" "+h.area).includes(S.dest.trim()))&&h.price<=S.max&&h.score>=S.rating&&
+    (!S.stars.size||S.stars.has(h.stars))&&[...S.am].every(a=>h.am.includes(a))&&(!S.favOnly||S.favs.has(h.id)));
+  const sorters={rec:(a,b)=>b.score*b.reviews**.15-a.score*a.reviews**.15,pa:(a,b)=>a.price-b.price,pd:(a,b)=>b.price-a.price,rt:(a,b)=>b.score-a.score};
+  L.sort(sorters[S.sort]);
+  $("#resultTitle").textContent=(S.favOnly?"რჩეულები":S.dest.trim()||"საქართველო")+": "+L.length+" სასტუმრო";
+  $("#favCount").textContent=S.favs.size;
+  $("#favBtn").setAttribute("aria-pressed",S.favOnly);
+  if(!L.length){$("#list").innerHTML=`<div class="empty">ამ პირობებით სასტუმრო ვერ მოიძებნა. სცადეთ ფილტრების შემსუბუქება ან სხვა მიმართულება.</div>`;return}
+  $("#list").innerHTML=L.map(h=>`
+   <article class="card">
+     <div class="thumb">${scene(h.scene)}<button class="fav" data-fav="${h.id}" aria-label="${S.favs.has(h.id)?"რჩეულებიდან ამოღება":"რჩეულებში დამატება"}">${heart(S.favs.has(h.id))}</button></div>
+     <div class="info">
+       <h3><button data-open="${h.id}">${h.name}</button></h3>
+       <div><span class="stars" aria-label="${h.stars} ვარსკვლავი">${"★".repeat(h.stars)}</span> <span class="loc">· ${h.city}, ${h.area}</span></div>
+       <p class="blurb">${h.blurb}</p>
+       <div class="tags">${h.am.slice(0,4).map(a=>`<span class="tag">${AMEN[a]}</span>`).join("")}</div>
+       ${h.left?`<div class="left">დარჩა ${h.left} ოთახი ამ ფასად</div>`:""}
+     </div>
+     <div class="side">
+       <div class="score"><span>${word(h.score)}<small>${h.reviews} შეფასება</small></span><b>${h.score.toFixed(1)}</b></div>
+       <div class="price"><small>${n} ღამე, ${S.guests} სტუმარი</small><strong>${fmt(h.price*n)}</strong><div class="per">${fmt(h.price)} ღამეში</div></div>
+       <button class="cta" data-open="${h.id}">ოთახების ნახვა</button>
+     </div>
+   </article>`).join("");
+}
 
-    document.getElementById('btn-ka').addEventListener('click', function () { setLang('ka'); });
-    document.getElementById('btn-en').addEventListener('click', function () { setLang('en'); });
+/* ---------- dialog ---------- */
+const dlg=$("#dlg");
+function openDlg(html){$("#dlgIn").innerHTML=html;if(!dlg.open)dlg.showModal();dlg.scrollTop=0}
+function hotelView(id){
+  const h=HOTELS.find(x=>x.id==id),n=nights();
+  openDlg(`
+   <div class="dlg-head"><div class="thumb">${scene(h.scene)}</div><button class="x" data-close aria-label="დახურვა">×</button></div>
+   <div class="dlg-body">
+     <div class="row"><div><span class="stars">${"★".repeat(h.stars)}</span><h2>${h.name}</h2><div class="loc">${h.city}, ${h.area}</div></div>
+       <div class="score"><span>${word(h.score)}<small>${h.reviews} შეფასება</small></span><b>${h.score.toFixed(1)}</b></div></div>
+     <p class="blurb" style="margin:0">${h.blurb}</p>
+     <div class="tags">${h.am.map(a=>`<span class="tag">${AMEN[a]}</span>`).join("")}</div>
+     <dl class="summary"><div><dt>შესვლა</dt><dd>${nicedate(S.ci)}, 14:00-დან</dd></div><div><dt>გასვლა</dt><dd>${nicedate(S.co)}, 12:00-მდე</dd></div><div><dt>ხანგრძლივობა</dt><dd>${n} ღამე · ${S.guests} სტუმარი</dd></div></dl>
+     <div class="rooms">${rooms(h).map((r,i)=>{const ok=r.cap>=S.guests;return `
+       <div class="room"><div><h4>${r.n}</h4><p>${r.d} · მაქს. ${r.cap} სტუმარი${ok?"":" — თქვენი ჯგუფისთვის მცირეა"}</p></div>
+       <div class="rp"><strong>${fmt(r.p*n)}</strong><small>${fmt(r.p)} ღამეში</small></div>
+       <button class="cta" data-room="${h.id}:${i}" ${ok?"":"disabled"}>არჩევა</button></div>`}).join("")}</div>
+     <div class="note">უფასო გაუქმება შესვლამდე 3 დღით ადრე. გადახდა ადგილზე.</div>
+   </div>`);
+}
+function bookView(hid,ri){
+  const h=HOTELS.find(x=>x.id==hid),r=rooms(h)[ri],n=nights();
+  openDlg(`
+   <div class="dlg-body">
+     <div class="row"><button class="back" data-open="${h.id}">← ოთახებზე დაბრუნება</button><button class="x" style="position:static;background:var(--sunk);color:var(--ink)" data-close aria-label="დახურვა">×</button></div>
+     <h2>დაჯავშნის დასრულება</h2>
+     <dl class="summary"><div><dt>სასტუმრო</dt><dd>${h.name}</dd></div><div><dt>ოთახი</dt><dd>${r.n}</dd></div>
+       <div><dt>თარიღები</dt><dd>${nicedate(S.ci)} – ${nicedate(S.co)}</dd></div><div><dt>სულ, ${n} ღამე</dt><dd>${fmt(r.p*n)}</dd></div></dl>
+     <form class="book" id="bookForm" novalidate data-h="${h.id}" data-r="${ri}">
+       <label class="inp">სახელი<input id="fn" autocomplete="given-name"><span class="e"></span></label>
+       <label class="inp">გვარი<input id="ln" autocomplete="family-name"><span class="e"></span></label>
+       <label class="inp">ელფოსტა<input id="em" type="email" autocomplete="email"><span class="e"></span></label>
+       <label class="inp">ტელეფონი<input id="ph" type="tel" placeholder="+995 5XX XX XX XX" autocomplete="tel"><span class="e"></span></label>
+       <label class="inp full">სპეციალური მოთხოვნა (არასავალდებულო)<textarea id="req" rows="2" placeholder="მაგ.: გვიანი შესვლა 22:00-ზე"></textarea></label>
+       <div class="full row"><span class="note">ჯავშანი სადემონსტრაციოა და მხოლოდ თქვენს ბრაუზერში შეინახება.</span><button class="cta" type="submit">დაჯავშნა · ${fmt(r.p*n)}</button></div>
+     </form>
+   </div>`);
+}
+function submitBooking(f){
+  const req={fn:"მიუთითეთ სახელი",ln:"მიუთითეთ გვარი",em:"მიუთითეთ სწორი ელფოსტა",ph:"მიუთითეთ ტელეფონის ნომერი, მინ. 9 ციფრი"};
+  let bad=null;
+  for(const id in req){const el=f.querySelector("#"+id),v=el.value.trim();
+    const ok=id==="em"?/^\S+@\S+\.\S+$/.test(v):id==="ph"?v.replace(/\D/g,"").length>=9:v.length>0;
+    el.nextElementSibling.textContent=ok?"":req[id];if(!ok&&!bad)bad=el;}
+  if(bad){bad.focus();return}
+  const h=HOTELS.find(x=>x.id==f.dataset.h),r=rooms(h)[f.dataset.r],n=nights();
+  const code="GH-"+Array.from({length:6},()=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.random()*32|0]).join("");
+  S.bookings.unshift({code,hotel:h.name,city:h.city,room:r.n,ci:S.ci,co:S.co,guests:S.guests,total:Math.round(r.p*n),name:f.querySelector("#fn").value.trim()});
+  store("ghame-bookings",S.bookings);
+  openDlg(`<div class="dlg-body"><div class="done">
+     <h2>ჯავშანი დადასტურებულია</h2>
+     <p class="blurb">${f.querySelector("#fn").value.trim()}, გელოდებით ${h.name}-ში ${nicedate(S.ci)}-ს.</p>
+     <div class="code">${code}</div>
+     <dl class="summary" style="width:100%;text-align:left"><div><dt>ოთახი</dt><dd>${r.n}</dd></div><div><dt>თარიღები</dt><dd>${nicedate(S.ci)} – ${nicedate(S.co)}</dd></div><div><dt>გადასახდელი ადგილზე</dt><dd>${fmt(r.p*n)}</dd></div></dl>
+     <button class="cta" data-close>კარგი</button></div></div>`);
+}
+function myView(){
+  openDlg(`<div class="dlg-body"><div class="row"><h2>ჩემი ჯავშნები</h2><button class="x" style="position:static;background:var(--sunk);color:var(--ink)" data-close aria-label="დახურვა">×</button></div>
+   ${S.bookings.length?`<div class="blist">${S.bookings.map((b,i)=>`<div class="bitem"><div><strong>${b.hotel}</strong><div class="loc">${b.city} · ${b.room}</div><div class="loc">${nicedate(b.ci)} – ${nicedate(b.co)} · ${b.guests} სტუმარი · ${fmt(b.total)}</div></div>
+     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px"><span class="code">${b.code}</span><button class="back" data-cancel="${i}">გაუქმება</button></div></div>`).join("")}</div>`
+   :`<div class="empty">ჯერ ჯავშანი არ გაქვთ. აირჩიეთ სასტუმრო და დააჭირეთ „ოთახების ნახვა“.</div>`}</div>`);
+}
 
-    var bookButtons = document.querySelectorAll('.book');
-    for (var b = 0; b < bookButtons.length; b++) {
-      bookButtons[b].addEventListener('click', function () { alert(t('bookAlert')); });
-    }
-
-    setLang(lang);
-  </script>
-
-
-  <!-- ========== 3. სამზარეულოს ფილტრი ========== -->
-  <script>
-    var currentFilter = 'all';
-
-    function applyFilter(filter) {
-      currentFilter = filter;
-      var buttons = document.querySelectorAll('.filters button');
-      for (var i = 0; i < buttons.length; i++) {
-        buttons[i].classList.toggle('active', buttons[i].getAttribute('data-filter') === filter);
-      }
-      var cards = document.querySelectorAll('.card');
-      for (var j = 0; j < cards.length; j++) {
-        var match = filter === 'all' || cards[j].getAttribute('data-cuisine') === filter;
-        cards[j].style.display = match ? '' : 'none';
-      }
-      if (typeof renderMarkers === 'function') renderMarkers();
-    }
-
-    var filterButtons = document.querySelectorAll('.filters button');
-    for (var f = 0; f < filterButtons.length; f++) {
-      filterButtons[f].addEventListener('click', function () {
-        applyFilter(this.getAttribute('data-filter'));
-      });
-    }
-  </script>
-
-
-  <!-- ========== 4. რუკა (OpenStreetMap) ========== -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    var map = null;
-    var markersLayer = null;
-
-    function renderMarkers() {
-      if (!map) return;
-      markersLayer.clearLayers();
-      var cards = document.querySelectorAll('.card[data-lat]');
-      for (var i = 0; i < cards.length; i++) {
-        var card = cards[i];
-        if (card.style.display === 'none') continue;
-        var name = card.querySelector('h3').textContent;
-        var info = card.querySelector('p').textContent;
-        L.marker([parseFloat(card.getAttribute('data-lat')), parseFloat(card.getAttribute('data-lng'))])
-          .bindPopup('<b>' + name + '</b><br>' + info)
-          .addTo(markersLayer);
-      }
-    }
-
-    try {
-      map = L.map('map').setView([41.7100, 44.7800], 13);
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(map);
-      markersLayer = L.layerGroup().addTo(map);
-      renderMarkers();
-    } catch (e) {
-      map = null;
-      document.getElementById('map').innerHTML = '<p class="note" style="padding:20px" data-i18n="mapError">' + t('mapError') + '</p>';
-    }
-  </script>
-
-
-  <!-- ========== 5. ამინდი (Open-Meteo, უფასო) ========== -->
-  <script>
-    var weatherData = null;
-    var weatherFailed = false;
-
-    function weatherIcon(code) {
-      if (code === 0) return '☀️';
-      if (code <= 2) return '🌤️';
-      if (code === 3) return '☁️';
-      if (code <= 48) return '🌫️';
-      if (code <= 67) return '🌧️';
-      if (code <= 77) return '❄️';
-      if (code <= 82) return '🌦️';
-      if (code <= 86) return '🌨️';
-      return '⛈️';
-    }
-
-    function renderWeather() {
-      var box = document.getElementById('weather');
-      if (weatherFailed) {
-        box.innerHTML = '<p class="note">' + t('weatherError') + '</p>';
-        return;
-      }
-      if (!weatherData) {
-        box.innerHTML = '<p class="note">' + t('loading') + '</p>';
-        return;
-      }
-      var html = '';
-      for (var i = 0; i < weatherData.time.length; i++) {
-        var date = new Date(weatherData.time[i] + 'T12:00:00');
-        var dayName = i === 0 ? t('today') : t('days')[date.getDay()];
-        html += '<div class="day">'
-          + '<div class="day-name">' + dayName + '</div>'
-          + '<div class="day-date">' + date.getDate() + '/' + (date.getMonth() + 1) + '</div>'
-          + '<div class="icon">' + weatherIcon(weatherData.weather_code[i]) + '</div>'
-          + '<div class="temp"><b>' + Math.round(weatherData.temperature_2m_max[i]) + '°</b> '
-          + '<span>' + Math.round(weatherData.temperature_2m_min[i]) + '°</span></div>'
-          + '</div>';
-      }
-      box.innerHTML = html;
-    }
-
-    fetch('https://api.open-meteo.com/v1/forecast?latitude=41.7151&longitude=44.8271'
-      + '&daily=weather_code,temperature_2m_max,temperature_2m_min'
-      + '&timezone=Asia%2FTbilisi&forecast_days=7')
-      .then(function (response) {
-        if (!response.ok) throw new Error('weather');
-        return response.json();
-      })
-      .then(function (data) {
-        weatherData = data.daily;
-        renderWeather();
-      })
-      .catch(function () {
-        weatherFailed = true;
-        renderWeather();
-      });
-  </script>
-
-</body>
-</html>
+/* ---------- events ---------- */
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-fav],[data-open],[data-room],[data-close],[data-cancel]");if(!t)return;
+  if(t.dataset.fav){const id=+t.dataset.fav;S.favs.has(id)?S.favs.delete(id):S.favs.add(id);store("ghame-favs",[...S.favs]);render()}
+  else if(t.dataset.open)hotelView(t.dataset.open);
+  else if(t.dataset.room){const[h,r]=t.dataset.room.split(":");bookView(h,+r)}
+  else if(t.dataset.cancel!==undefined){S.bookings.splice(+t.dataset.cancel,1);store("ghame-bookings",S.bookings);myView()}
+  else if("close" in t.dataset)dlg.close();
+});
+dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
+dlg.addEventListener("submit",e=>{if(e.target.id==="bookForm"){e.preventDefault();submitBooking(e.target)}});
+$("#searchForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const ci=$("#ci").value,co=$("#co").value;
+  if(!ci||!co){$("#searchErr").textContent="აირჩიეთ შესვლისა და გასვლის თარიღები.";return}
+  if(co<=ci){$("#searchErr").textContent="გასვლის თარიღი შესვლის შემდეგ უნდა იყოს.";$("#co").focus();return}
+  $("#searchErr").textContent="";
+  Object.assign(S,{dest:$("#dest").value,ci,co,guests:+$("#guests").value});render();
+});
+$("#ci").addEventListener("change",()=>{const ci=$("#ci").value;$("#co").min=iso(addDays(new Date(ci+"T12:00"),1));if($("#co").value<=ci)$("#co").value=iso(addDays(new Date(ci+"T12:00"),3))});
+$("#maxPrice").addEventListener("input",e=>{S.max=+e.target.value;$("#maxPriceLbl").textContent=S.max+" ₾-მდე";render()});
+$("#filters").addEventListener("change",e=>{const t=e.target;
+  if(t.dataset.star!==undefined){t.checked?S.stars.add(+t.value):S.stars.delete(+t.value)}
+  else if(t.dataset.am!==undefined){t.checked?S.am.add(t.value):S.am.delete(t.value)}
+  else if(t.name==="rating")S.rating=+t.value;
+  render()});
+$("#resetBtn").addEventListener("click",()=>{S.stars.clear();S.am.clear();S.rating=0;S.max=400;
+  document.querySelectorAll("#filters input[type=checkbox]").forEach(c=>c.checked=false);
+  document.querySelector('input[name=rating][value="0"]').checked=true;$("#maxPrice").value=400;$("#maxPriceLbl").textContent="400 ₾-მდე";render()});
+$("#sort").addEventListener("change",e=>{S.sort=e.target.value;render()});
+$("#favBtn").addEventListener("click",()=>{S.favOnly=!S.favOnly;render()});
+$("#myBtn").addEventListener("click",myView);
+render();
+</script>
