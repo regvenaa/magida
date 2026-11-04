@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>მაგიდა — დაჯავშნე მაგიდა</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans Georgian', sans-serif;
+      background: #FFF8F0;
+      color: #333;
+    }
+    header {
+      background: #8B1E3F;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .hero {
+      text-align: center;
+      padding: 50px 20px;
+    }
+    .hero h2 {
+      font-size: 28px;
+      color: #8B1E3F;
+    }
+    .restaurants {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      width: 260px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .card button {
+      background: #8B1E3F;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🍽️ მაგიდა</h1>
+  </header>
+
+  <section class="hero">
+    <h2>დაჯავშნე მაგიდა საქართველოს რესტორნებში</h2>
+    <p>რესტორნები, ბარები და კაფეები — ერთ ადგილას</p>
+  </section>
+
+  <section class="restaurants">
+    <div class="card">
+      <h3>სამაგალითო რესტორანი 1</h3>
+      <p>📍 თბილისი · ქართული სამზარეულო</p>
+      <button>დაჯავშნა</button>
+    </div>
+    <div class="card">
+      <h3>სამაგალითო ბარი 2</h3>
+      <p>📍 ბათუმი · ღვინის ბარი</p>
+      <button>დაჯავშნა</button>
+    </div>
+    <div class="card">
+      <h3>სამაგალითო კაფე 3</h3>
+      <p>📍 ქუთაისი · კაფე</p>
+      <button>დაჯავშნა</button>
+    </div>
+  </section>
+
+</body>
+</html>
